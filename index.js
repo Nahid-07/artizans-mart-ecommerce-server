@@ -58,6 +58,11 @@ async function run() {
       const orders = await placeOrder.insertOne(body);
       res.send(orders);
     })
+
+    app.get('/orders', async(req, res)=>{
+      const orders = await placeOrder.find().toArray();
+      res.send(orders)
+    })
   } finally {
   }
 }
