@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import cors from "cors";
 import { MongoClient, ObjectId } from "mongodb";
 const app = express();
@@ -54,6 +54,11 @@ async function run() {
       const data = await productData.find().toArray();
       res.send(data);
     });
+    app.get('/featuredProducts', async(req,res)=>{
+      const products = await productData.find().toArray()
+      const featuredProducts = products.filter(product => product.is_featured === true)
+      res.send(featuredProducts)
+    })
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
