@@ -42,6 +42,8 @@ app.post("/addProduct", async (req, res) => {
     res.status(500).send({ message: "Failed to add product" });
   }
 });
+
+// get all the products api
 app.get("/products", async (req, res) => {
   const productData = db.collection("product-data");
   const data = await productData.find().toArray();
@@ -54,7 +56,9 @@ app.get("/products", async (req, res) => {
 app.get("/featured-products", async (req, res) => {
   try {
     const productData = db.collection("product-data");
-    const featuredProducts = await productData.find({ is_featured: true }).toArray();
+    const featuredProducts = await productData
+      .find({ is_featured: true })
+      .toArray();
 
     if (featuredProducts.length === 0) {
       return res.status(404).json({ message: "No featured products found" });
@@ -88,25 +92,29 @@ app.get("/products/:id", async (req, res) => {
 });
 
 // review post api
-app.post('/reviews', async (req, res) => {
+app.post("/reviews", async (req, res) => {
   try {
-    const productReviews = db.collection('reviews');
+    const productReviews = db.collection("reviews");
     const result = await productReviews.insertOne(req.body);
-    
+
     // Check if the insertion was successfully acknowledged by the database
     if (result.acknowledged) {
-      res.status(201).json({ 
-        message: "Review posted successfully!", 
-        insertedId: result.insertedId 
+      res.status(201).json({
+        message: "Review posted successfully!",
+        insertedId: result.insertedId,
       });
     } else {
       // This case is unlikely with a working connection but handles potential database issues
-      res.status(500).json({ message: "Failed to post review. Please try again." });
+      res
+        .status(500)
+        .json({ message: "Failed to post review. Please try again." });
     }
   } catch (error) {
     console.error(error);
     // Use a specific message for client-side feedback
-    res.status(500).send({ message: "An internal server error occurred. Please try again later." });
+    res.status(500).send({
+      message: "An internal server error occurred. Please try again later.",
+    });
   }
 });
 app.get("/reviews", async (req, res) => {
@@ -146,6 +154,39 @@ app.get("/search", async (req, res) => {
     console.error("Search error:", error);
     res.status(500).send({ message: "Failed to perform search" });
   }
+});
+
+// order place api
+
+app.post("/place-order", async (req, res) => {
+  try {
+    const Orders = db.collection("orders");
+    const result = await Orders.insertOne(req.body);
+    if (result.acknowledged) {
+      res.status(201).json({
+        message: "Order placed successfully",
+        insertedId: result.insertedId,
+      });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to post review. Please try again." });
+  }
+});
+
+app.get("/orders", async (req, res) => {
+  try {
+    const orders = db.collection("orders");
+    const result = await orders.find().toArray();
+    if (!result) {
+      res
+        .status(404)
+        .send({ message: "Cannot get data. something went wrong" });
+    } else {
+      res.status(200).send(result);
+    }
+  } catch (error) {}
 });
 
 app.listen(port, () => {
