@@ -189,6 +189,33 @@ app.get("/orders", async (req, res) => {
   } catch (error) {}
 });
 
+// shop by category api
+
+app.get("/category/:category", async (req, res) => {
+  try {
+    const allProduct = db.collection("product-data");
+
+    // Get the category from the URL parameter
+    const category = req.params.category;
+
+    // Use the category variable to filter the database query
+    const result = await allProduct.find({ category: category }).toArray();
+
+    if (result.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No products found in this category." });
+    }
+
+    res.status(200).send(result);
+  } catch (error) {
+    console.error("Error fetching products by category:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching products." });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
