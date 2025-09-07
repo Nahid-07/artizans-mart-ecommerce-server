@@ -215,7 +215,78 @@ app.get("/category/:category", async (req, res) => {
       .json({ message: "An error occurred while fetching products." });
   }
 });
+// product update api created
+app.put("/update-product/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    // 1. Input Validation: Check if the ID is valid and body is not empty.
+    if (!id || Object.keys(req.body).length === 0) {
+      return res
+        .status(400)
+        .json({ error: "Missing product ID or request body." });
+    }
+
+    // Validate ObjectId format to prevent bad input from reaching the database.
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid product ID format." });
+    }
+
+    // 2. Destructuring and Data Sanitization: Extract only the allowed fields.
+    const {
+      name,
+      brand,
+      price,
+      rating,
+      category,
+      is_featured,
+      stock_status,
+      short_description,
+      long_description,
+      images,
+      features,
+    } = req.body;
+
+    // 3. Dynamic Update Object: Build the $set object dynamically.
+    // This prevents hardcoding fields and allows for partial updates.
+    const updateFields = {};
+    if (name) updateFields.name = name;
+    if (brand) updateFields.brand = brand;
+    if (price !== undefined) updateFields.price = price;
+    if (rating !== undefined) updateFields.rating = rating;
+    if (category) updateFields.category = category;
+    if (is_featured !== undefined) updateFields.is_featured = is_featured;
+    if (stock_status) updateFields.stock_status = stock_status;
+    if (short_description) updateFields.short_description = short_description;
+    if (long_description) updateFields.long_description = long_description;
+    if (images) updateFields.images = images;
+    if (features) updateFields.features = features;
+
+    // If no fields are provided for update, return an error.
+    if (Object.keys(updateFields).length === 0) {
+      return res
+        .status(400)
+        .json({ error: "No valid fields provided for update." });
+    }
+
+    const productData = db.collection("product-data");
+    const filter = { _id: new ObjectId(id) };
+    const updatedata = { $set: updateFields };
+
+    const result = await productData.updateOne(filter, updatedata);
+
+    // 4. Proper Response Handling: Check the result of the database operation.
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Product not found." });
+    }
+
+    res.status(200).json({ message: "Product updated successfully.", result });
+  } catch (error) {
+    // 5. Specific Error Handling: Log the error and return a generic server error.
+    console.error("Failed to update product:", error);
+    res.status(500).json({ error: "Internal Server Error." });
+  }
+});
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
