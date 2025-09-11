@@ -133,28 +133,29 @@ app.get("/reviews", async (req, res) => {
   }
 });
 
-// app.get("/search", async (req, res) => {
-//   const searchItem = req.query.q;
-//   if (!searchItem) {
-//     return res.status(400).json({ message: "Search query is required." });
-//   }
-//   try {
-//     const productData = db.collection("product-data");
-//     const result = await productData
-//       .find({
-//         $or: [
-//           { name: { $regex: searchItem, $options: "i" } },
-//           { short_description: { $regex: searchItem, $options: "i" } },
-//           { long_description: { $regex: searchItem, $options: "i" } },
-//         ],
-//       })
-//       .toArray();
-//     res.status(200).json(result);
-//   } catch (error) {
-//     console.error("Search error:", error);
-//     res.status(500).send({ message: "Failed to perform search" });
-//   }
-// });
+app.get("/search", async (req, res) => {
+  const searchItem = req.query.q;
+  if (!searchItem) {
+    return res.status(400).json({ message: "Search query is required." });
+  }
+  try {
+    const productData = db.collection("product-data");
+    const result = await productData
+      .find({
+        $or: [
+          { name: { $regex: searchItem, $options: "i" } },
+          { short_description: { $regex: searchItem, $options: "i" } },
+          { long_description: { $regex: searchItem, $options: "i" } },
+          { category: { $regex: searchItem, $options: "i" } },
+        ],
+      })
+      .toArray();
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).send({ message: "Failed to perform search" });
+  }
+});
 
 // order place api
 
