@@ -60,10 +60,8 @@ app.get("/featured-products", async (req, res) => {
       .find({ is_featured: true })
       .toArray();
 
-    if (featuredProducts.length === 0) {
-      return res.status(404).json({ message: "No featured products found" });
-    }
-
+    // Always send a 200 OK status.
+    // If no products are found, the array will be empty [].
     res.status(200).json(featuredProducts);
   } catch (error) {
     console.error("Error fetching featured products:", error);
@@ -288,6 +286,32 @@ app.put("/update-product/:id", async (req, res) => {
     // 5. Specific Error Handling: Log the error and return a generic server error.
     console.error("Failed to update product:", error);
     res.status(500).json({ error: "Internal Server Error." });
+  }
+});
+
+app.delete('/delete-a-product/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check if the provided ID is a valid ObjectId
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid product ID.' });
+    }
+
+    const productData = db.collection('product-data');
+
+    const result = await productData.deleteOne({ _id: new ObjectId(id) });
+    
+    // Check if a document was actually deleted
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'Product not found.' });
+    }
+
+    res.status(200).json({ message: 'Product successfully deleted.', result });
+
+  } catch (error) {
+    console.error(error); // Log the error on the server side
+    res.status(500).json({ error: 'An error occurred while deleting the product.' });
   }
 });
 app.listen(port, () => {
