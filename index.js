@@ -193,14 +193,8 @@ app.get("/orders", async (req, res) => {
 app.get("/category/:category", async (req, res) => {
   try {
     const allProduct = db.collection("product-data");
-
-    // Get the category from the URL parameter
     const category = req.params.category;
-    console.log(category)
-
-    // Use the category variable to filter the database query
     const result = await allProduct.find({ category: category }).toArray();
-
     if (result.length === 0) {
       return res
         .status(404)
@@ -290,29 +284,30 @@ app.put("/update-product/:id", async (req, res) => {
   }
 });
 
-app.delete('/delete-a-product/:id', async (req, res) => {
+app.delete("/delete-a-product/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Check if the provided ID is a valid ObjectId
     if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: 'Invalid product ID.' });
+      return res.status(400).json({ error: "Invalid product ID." });
     }
 
-    const productData = db.collection('product-data');
+    const productData = db.collection("product-data");
 
     const result = await productData.deleteOne({ _id: new ObjectId(id) });
-    
+
     // Check if a document was actually deleted
     if (result.deletedCount === 0) {
-      return res.status(404).json({ message: 'Product not found.' });
+      return res.status(404).json({ message: "Product not found." });
     }
 
-    res.status(200).json({ message: 'Product successfully deleted.', result });
-
+    res.status(200).json({ message: "Product successfully deleted.", result });
   } catch (error) {
     console.error(error); // Log the error on the server side
-    res.status(500).json({ error: 'An error occurred while deleting the product.' });
+    res
+      .status(500)
+      .json({ error: "An error occurred while deleting the product." });
   }
 });
 app.listen(port, () => {
