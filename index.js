@@ -196,6 +196,7 @@ app.get("/category/:category", async (req, res) => {
 
     // Get the category from the URL parameter
     const category = req.params.category;
+    console.log(category)
 
     // Use the category variable to filter the database query
     const result = await allProduct.find({ category: category }).toArray();
