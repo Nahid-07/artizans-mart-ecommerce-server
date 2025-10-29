@@ -284,32 +284,69 @@ app.put("/update-product/:id", async (req, res) => {
   }
 });
 
-app.delete("/delete-a-product/:id", async (req, res) => {
+app.post("/register", async (req, res) => {
   try {
-    const { id } = req.params;
+    const userCollection = db.collection("user-data");
+    const user = req.body;
 
-    // Check if the provided ID is a valid ObjectId
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid product ID." });
-    }
+    const newUser = {
+      ...user,
+      role: "user",
+      createdAt: new Date(),
+    };
 
-    const productData = db.collection("product-data");
+    const result = await userCollection.insertOne(newUser);
 
-    const result = await productData.deleteOne({ _id: new ObjectId(id) });
-
-    // Check if a document was actually deleted
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "Product not found." });
-    }
-
-    res.status(200).json({ message: "Product successfully deleted.", result });
-  } catch (error) {
-    console.error(error); // Log the error on the server side
-    res
-      .status(500)
-      .json({ error: "An error occurred while deleting the product." });
+    res.status(201).send({
+      message: "User registered successfully.",
+      userId: result.insertedId,
+      role: "user",
+    });
+  } catch (err) {
+    console.error("User registration error:", err);
+    res.status(500).send({ message: "An internal server error occurred." });
   }
 });
+
+app.post("/users", async (req, res) => {
+  try {
+    const user = req.body;
+    const userCollection = db.collection("user-data");
+    const existingUser = await userCollection.findOne({ email: user.email });
+    if (existingUser) {
+      return res
+        .status(409)
+        .send({
+          success: false,
+          message: "User with this email already exists.",
+        });
+    }
+
+    const newUser = {
+      ...user,
+      role: "user",
+      createdAt: new Date(),
+    };
+    const result = await userCollection.insertOne(newUser);
+
+    // 4. SUCCESS RESPONSE
+    res.status(201).send({
+      success: true,
+      message: "User created successfully!",
+      insertedId: result.insertedId,
+    });
+  } catch (error) {
+    // 5. ERROR RESPONSE
+    console.error("Error creating user:", error);
+    res.status(500).send({
+      success: false,
+      message: "Failed to create user due to a server error.",
+      error: error.message,
+    });
+  }
+});
+
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
