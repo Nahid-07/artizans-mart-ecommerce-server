@@ -59,9 +59,6 @@ app.get("/featured-products", async (req, res) => {
     const featuredProducts = await productData
       .find({ is_featured: true })
       .toArray();
-
-    // Always send a 200 OK status.
-    // If no products are found, the array will be empty [].
     res.status(200).json(featuredProducts);
   } catch (error) {
     console.error("Error fetching featured products:", error);
@@ -95,21 +92,19 @@ app.post("/reviews", async (req, res) => {
     const productReviews = db.collection("reviews");
     const result = await productReviews.insertOne(req.body);
 
-    // Check if the insertion was successfully acknowledged by the database
     if (result.acknowledged) {
       res.status(201).json({
         message: "Review posted successfully!",
         insertedId: result.insertedId,
       });
     } else {
-      // This case is unlikely with a working connection but handles potential database issues
       res
         .status(500)
         .json({ message: "Failed to post review. Please try again." });
     }
   } catch (error) {
     console.error(error);
-    // Use a specific message for client-side feedback
+
     res.status(500).send({
       message: "An internal server error occurred. Please try again later.",
     });
@@ -126,7 +121,6 @@ app.get("/reviews", async (req, res) => {
 
     res.status(200).json(reviews);
   } catch (error) {
-    console.error(error);
     res.status(500).send({ message: "Failed to get reviews" });
   }
 });
@@ -284,42 +278,16 @@ app.put("/update-product/:id", async (req, res) => {
   }
 });
 
-app.post("/register", async (req, res) => {
-  try {
-    const userCollection = db.collection("user-data");
-    const user = req.body;
-
-    const newUser = {
-      ...user,
-      role: "user",
-      createdAt: new Date(),
-    };
-
-    const result = await userCollection.insertOne(newUser);
-
-    res.status(201).send({
-      message: "User registered successfully.",
-      userId: result.insertedId,
-      role: "user",
-    });
-  } catch (err) {
-    console.error("User registration error:", err);
-    res.status(500).send({ message: "An internal server error occurred." });
-  }
-});
-
 app.post("/users", async (req, res) => {
   try {
     const user = req.body;
     const userCollection = db.collection("user-data");
     const existingUser = await userCollection.findOne({ email: user.email });
     if (existingUser) {
-      return res
-        .status(409)
-        .send({
-          success: false,
-          message: "User with this email already exists.",
-        });
+      return res.status(409).send({
+        success: false,
+        message: "User with this email already exists.",
+      });
     }
 
     const newUser = {
@@ -345,8 +313,33 @@ app.post("/users", async (req, res) => {
     });
   }
 });
+// get user
+app.get("/user", async (req, res) => {
+  try {
+    const usersCollection = db.collection("user-data");
+    const targetEmail = req.query.email;
+    if (!targetEmail) {
+      return res
+        .status(400)
+        .send({ message: "Email query parameter is required." });
+    }
 
+    const user = await usersCollection.findOne({ email: targetEmail });
 
+    if (!user) {
+      return res.status(404).send({ message: "User not found." });
+    }
+    res.status(200).send(user);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res
+      .status(500)
+      .send({
+        message: "An internal server error occurred.",
+        details: error.message,
+      });
+  }
+});
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
