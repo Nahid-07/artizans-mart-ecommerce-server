@@ -278,6 +278,30 @@ app.put("/update-product/:id", async (req, res) => {
   }
 });
 
+app.delete("/delete-a-product/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    
+    // Validate ID format
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid product ID" });
+    }
+
+    const query = { _id: new ObjectId(id) };
+    const productData = db.collection("product-data");
+    const result = await productData.deleteOne(query);
+
+    if (result.deletedCount === 0) {
+      return res.status(404).send({ message: "Product not found" });
+    }
+
+    res.status(200).send({ result });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).send({ message: "Failed to delete product" });
+  }
+});
+
 app.post("/users", async (req, res) => {
   try {
     const user = req.body;
