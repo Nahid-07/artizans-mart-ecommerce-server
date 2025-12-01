@@ -9,7 +9,7 @@ import {
   updateProduct,
   deleteProduct,
 } from "../controllers/productController.js";
-import { verifyToken } from "../middlewares/verifyToken.js";
+import { verifyToken } from "../middlewares/varifyToken.js";
 
 const router = express.Router();
 
