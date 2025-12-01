@@ -5,18 +5,16 @@ configDotenv();
 
 export const createToken = async (req, res) => {
   const user = req.body;
-
-  // Create a token
   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "365d",
   });
 
-  // Send token as a cookie
   res
     .cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      // CHANGE THIS: 'strict' -> 'lax'
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     })
     .send({ success: true });
 };
@@ -26,7 +24,8 @@ export const logoutUser = async (req, res) => {
     .clearCookie("token", {
       maxAge: 0,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+      // CHANGE THIS: 'strict' -> 'lax'
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     })
     .send({ success: true });
 };
