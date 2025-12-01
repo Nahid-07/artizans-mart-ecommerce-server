@@ -10,11 +10,17 @@ const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
-app.use(cookieParser()); // Use cookie parser
+app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:5173"], // REPLACE with your Frontend URL
-    credentials: true, // Allow cookies
+    origin: [
+      "http://localhost:5173", 
+      "http://localhost:5174",
+      "http://127.0.0.1:5173",
+      "https://artizans-mart-ecommerce-project.web.app",
+      "https://artizans-mart-ecommerce-project.firebaseapp.com"
+    ],
+    credentials: true,
   })
 );
 
