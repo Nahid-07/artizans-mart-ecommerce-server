@@ -17,7 +17,7 @@ app.use(
       "http://localhost:5173", 
       "http://localhost:5174",
       "http://127.0.0.1:5173",
-      "https://artizans-mart-ecommerce-project.web.app",
+      "https://artizans-mart-auth.web.app",
       "https://artizans-mart-ecommerce-project.firebaseapp.com"
     ],
     credentials: true,
