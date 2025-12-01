@@ -4,11 +4,11 @@ import { configDotenv } from "dotenv";
 configDotenv();
 
 export const verifyToken = (req, res, next) => {
-  const token = req.cookies?.token;
- 
-  if (!token) {
+  if (!req.headers.authorization) {
     return res.status(401).send({ message: "Unauthorized access" });
   }
+
+  const token = req.headers.authorization.split(" ")[1];
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {

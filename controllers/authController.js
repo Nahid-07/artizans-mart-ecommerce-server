@@ -8,22 +8,9 @@ export const createToken = async (req, res) => {
   const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: "365d",
   });
-
-  res
-    .cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    })
-    .send({ success: true });
+  res.send({ success: true, token });
 };
 
 export const logoutUser = async (req, res) => {
-  res
-    .clearCookie("token", {
-      maxAge: 0,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    })
-    .send({ success: true });
+  res.send({ success: true });
 };
