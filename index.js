@@ -1,9 +1,10 @@
 import express from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser"; // Import this
+import cookieParser from "cookie-parser";
 import { connectToDatabase, getDb } from "./utils/db.js";
 import productRoutes from "./routes/productRoutes.js";
 import { createToken, logoutUser } from "./controllers/authController.js";
+import { ObjectId } from "mongodb";
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -16,14 +17,14 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "http://127.0.0.1:5173",
-      "https://artizans-mart-auth.web.app",
+      "https://artizans-mart-ecommerce-project.web.app",
       "https://artizans-mart-ecommerce-project.firebaseapp.com",
     ],
     credentials: true,
   })
 );
 
+// Initialize Database
 connectToDatabase();
 
 // Auth Routes
@@ -33,7 +34,63 @@ app.post("/logout", logoutUser);
 // Use Product Routes
 app.use("/", productRoutes);
 
-// Reviews
+// Basic Route
+app.get("/", (req, res) => {
+  res.send("Artizans server is running");
+});
+
+// --- Order Routes ---
+
+// Place Order
+app.post("/place-order", async (req, res) => {
+  try {
+    const result = await getDb().collection("orders").insertOne(req.body);
+    if (result.acknowledged) {
+      res
+        .status(201)
+        .json({ message: "Order placed!", insertedId: result.insertedId });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Failed to place order." });
+  }
+});
+
+// Get All Orders
+app.get("/orders", async (req, res) => {
+  try {
+    const result = await getDb().collection("orders").find().toArray();
+    res.status(200).send(result);
+  } catch (error) {
+    res.status(500).send({ message: "Error fetching orders" });
+  }
+});
+
+// Update Order Status (PATCH) - THIS FIXES YOUR ERROR
+app.patch("/orders/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { status } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid Order ID" });
+    }
+
+    const filter = { _id: new ObjectId(id) };
+    const updateDoc = {
+      $set: { status: status },
+    };
+
+    const result = await getDb()
+      .collection("orders")
+      .updateOne(filter, updateDoc);
+    res.send(result);
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).send({ message: "Failed to update status" });
+  }
+});
+
+// --- Review Routes ---
 app.post("/reviews", async (req, res) => {
   try {
     const result = await getDb().collection("reviews").insertOne(req.body);
@@ -56,57 +113,7 @@ app.get("/reviews", async (req, res) => {
   }
 });
 
-// Orders
-app.post("/place-order", async (req, res) => {
-  try {
-    const result = await getDb().collection("orders").insertOne(req.body);
-    if (result.acknowledged) {
-      res
-        .status(201)
-        .json({ message: "Order placed!", insertedId: result.insertedId });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Failed to place order." });
-  }
-});
-
-app.get("/orders", async (req, res) => {
-  try {
-    const result = await getDb().collection("orders").find().toArray();
-    res.status(200).send(result);
-  } catch (error) {
-    res.status(500).send({ message: "Error fetching orders" });
-  }
-});
-
-// update order status
-app.patch("/orders/:id", async (req, res) => {
-  try {
-    const id = req.params.id;
-    const { status } = req.body;
-
-    if (!ObjectId.isValid(id)) {
-      return res.status(400).send({ message: "Invalid Order ID" });
-    }
-
-    const filter = { _id: new ObjectId(id) };
-    const updateDoc = {
-      $set: {
-        status: status,
-      },
-    };
-
-    const result = await getDb()
-      .collection("orders")
-      .updateOne(filter, updateDoc);
-    res.send(result);
-  } catch (error) {
-    console.error("Error updating order status:", error);
-    res.status(500).send({ message: "Failed to update status" });
-  }
-});
-
-// Users
+// --- User Routes ---
 app.post("/users", async (req, res) => {
   try {
     const user = req.body;
@@ -120,11 +127,13 @@ app.post("/users", async (req, res) => {
       role: "user",
       createdAt: new Date(),
     });
-    res.status(201).send({
-      success: true,
-      message: "User created!",
-      insertedId: result.insertedId,
-    });
+    res
+      .status(201)
+      .send({
+        success: true,
+        message: "User created!",
+        insertedId: result.insertedId,
+      });
   } catch (error) {
     res.status(500).send({ success: false, message: "Error creating user" });
   }
