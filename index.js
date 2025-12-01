@@ -14,11 +14,11 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", 
+      "http://localhost:5173",
       "http://localhost:5174",
       "http://127.0.0.1:5173",
       "https://artizans-mart-auth.web.app",
-      "https://artizans-mart-ecommerce-project.firebaseapp.com"
+      "https://artizans-mart-ecommerce-project.firebaseapp.com",
     ],
     credentials: true,
   })
@@ -79,6 +79,33 @@ app.get("/orders", async (req, res) => {
   }
 });
 
+// update order status
+app.patch("/orders/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { status } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid Order ID" });
+    }
+
+    const filter = { _id: new ObjectId(id) };
+    const updateDoc = {
+      $set: {
+        status: status,
+      },
+    };
+
+    const result = await getDb()
+      .collection("orders")
+      .updateOne(filter, updateDoc);
+    res.send(result);
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).send({ message: "Failed to update status" });
+  }
+});
+
 // Users
 app.post("/users", async (req, res) => {
   try {
@@ -93,13 +120,11 @@ app.post("/users", async (req, res) => {
       role: "user",
       createdAt: new Date(),
     });
-    res
-      .status(201)
-      .send({
-        success: true,
-        message: "User created!",
-        insertedId: result.insertedId,
-      });
+    res.status(201).send({
+      success: true,
+      message: "User created!",
+      insertedId: result.insertedId,
+    });
   } catch (error) {
     res.status(500).send({ success: false, message: "Error creating user" });
   }
