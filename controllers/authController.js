@@ -13,7 +13,6 @@ export const createToken = async (req, res) => {
     .cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      // CHANGE THIS: 'strict' -> 'lax'
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     })
     .send({ success: true });
@@ -24,7 +23,6 @@ export const logoutUser = async (req, res) => {
     .clearCookie("token", {
       maxAge: 0,
       secure: process.env.NODE_ENV === "production",
-      // CHANGE THIS: 'strict' -> 'lax'
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     })
     .send({ success: true });
