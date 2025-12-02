@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser";
 import { connectToDatabase, getDb } from "./utils/db.js";
 import productRoutes from "./routes/productRoutes.js";
 import { createToken, logoutUser } from "./controllers/authController.js";
@@ -11,13 +10,12 @@ const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
-app.use(cookieParser());
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://artizans-mart-ecommerce-project.web.app",
+      "https://artizans-mart-auth.web.app",
       "https://artizans-mart-ecommerce-project.firebaseapp.com",
     ],
     credentials: true,
