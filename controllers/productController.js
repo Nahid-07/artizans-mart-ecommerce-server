@@ -14,12 +14,30 @@ export const addProduct = async (req, res) => {
   }
 };
 
-// Get all products
+// Get all products with Pagination
 export const getAllProducts = async (req, res) => {
   try {
-    const data = await getProductsCollection().find().toArray();
-    res.status(200).json(data);
+    const page = parseInt(req.query.page) || 0; // Default to page 0
+    const limit = parseInt(req.query.limit) || 6; // Default to 10 items per page
+    const skip = page * limit;
+
+    const products = await getProductsCollection()
+      .find()
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    // Get total count for frontend pagination logic
+    const totalProducts = await getProductsCollection().estimatedDocumentCount();
+
+    res.status(200).json({
+      products,
+      totalProducts,
+      currentPage: page,
+      totalPages: Math.ceil(totalProducts / limit)
+    });
   } catch (error) {
+    console.error(error);
     res.status(500).send({ message: "Failed to fetch products" });
   }
 };
