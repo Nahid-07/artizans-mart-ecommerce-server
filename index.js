@@ -17,7 +17,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://artizans-mart-auth.web.app/",
+      "https://artizans-mart-auth.web.app",
     ],
     credentials: true,
   })
