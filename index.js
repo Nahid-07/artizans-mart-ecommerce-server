@@ -5,6 +5,7 @@ import { connectToDatabase, getDb } from "./utils/db.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import { createToken, logoutUser } from "./controllers/authController.js";
+import statsRoutes from "./routes/statsRoutes.js";
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -31,6 +32,7 @@ app.post("/logout", logoutUser);
 
 app.use("/", productRoutes);
 app.use("/", orderRoutes);
+app.use("/", statsRoutes);
 
 // Basic Route
 app.get("/", (req, res) => {
