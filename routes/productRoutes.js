@@ -16,7 +16,7 @@ const router = express.Router();
 // Public Routes (Anyone can see products)
 router.get("/products", getAllProducts);
 router.get("/featured-products", getFeaturedProducts);
-router.get("/products/:id", getProductById);
+router.get("/product/:id", getProductById);
 router.get("/search", searchProducts);
 router.get("/category/:category", getProductsByCategory);
 
