@@ -5,12 +5,14 @@ import {
   getAllOrders,
   getOrdersByEmail,
   updateOrderStatus,
+  getOrderById
 } from "../controllers/orderController.js";
 
 const router = express.Router();
 
 // Public/User Routes
 router.post("/place-order", placeOrder); // Can be protected if you force login
+router.get("/orders/track/:id", getOrderById);
 router.get("/my-orders/:email", verifyToken, getOrdersByEmail); // PROTECTED
 
 // Admin Routes (Should ideally add verifyAdmin middleware later)

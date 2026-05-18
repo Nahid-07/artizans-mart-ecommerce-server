@@ -12,26 +12,17 @@ const port = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(cookieParser());
-// app.use(
-//   cors({
-//     origin: [
-//       "http://localhost:5173",
-//       "http://localhost:5174",
-//       "https://artizans-mart-auth.web.app",
-//     ],
-//     credentials: true,
-//   })
-// );
+
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", 
+      "http://localhost:5173",
       "http://localhost:5174",
-      "http://localhost:3000", // <-- ADD YOUR NEXT.JS PORT HERE
+      "http://localhost:3000",
       "https://artizans-mart-auth.web.app",
     ],
     credentials: true,
-  })
+  }),
 );
 
 connectToDatabase();
@@ -83,13 +74,11 @@ app.post("/users", async (req, res) => {
       role: "user",
       createdAt: new Date(),
     });
-    res
-      .status(201)
-      .send({
-        success: true,
-        message: "User created!",
-        insertedId: result.insertedId,
-      });
+    res.status(201).send({
+      success: true,
+      message: "User created!",
+      insertedId: result.insertedId,
+    });
   } catch (error) {
     res.status(500).send({ success: false, message: "Error creating user" });
   }

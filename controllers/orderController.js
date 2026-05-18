@@ -65,3 +65,26 @@ export const updateOrderStatus = async (req, res) => {
     res.status(500).send({ message: "Failed to update status" });
   }
 };
+
+// 5. Get a Single Order by ID (For Public Tracking)
+export const getOrderById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).send({ message: "Invalid Order ID format" });
+    }
+
+    const query = { _id: new ObjectId(id) };
+    const result = await getOrdersCollection().findOne(query);
+
+    if (!result) {
+      return res.status(404).send({ message: "Order not found" });
+    }
+
+    res.status(200).send(result);
+  } catch (error) {
+    console.error("Error fetching single order:", error);
+    res.status(500).send({ message: "Error fetching order details" });
+  }
+};
