@@ -20,7 +20,7 @@ app.use(
       "http://localhost:5174",
       "http://localhost:3000",
       "https://artizans-mart-auth.web.app",
-      "https://artizans-mart-ecommerce-nextjs.vercel.app/"
+      "https://artizans-mart-ecommerce-nextjs.vercel.app"
     ],
     credentials: true,
   }),
